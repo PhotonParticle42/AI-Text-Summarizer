@@ -6,31 +6,36 @@
     <title>Text Summarizer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
+    <div class="container">
+        <h1>AI Text Summarizer</h1>
 
-<div class="container">
+        <textarea id="inputText" placeholder="Paste your text here..."></textarea>
 
-<h1>AI Text Summarizer</h1>
+        <button onclick="summarizeText()">Summarize</button>
 
-<textarea id="inputText" placeholder="Paste your text here..."></textarea>
+        <h2>Summary</h2>
+        <div id="output">Your summary will appear here.</div>
+    </div>
 
-<button onclick="summarize()">Summarize</button>
+    <script>
+        async function summarizeText() {
+            const text = document.getElementById("inputText").value;
+            const output = document.getElementById("output");
 
-<h2>Summary</h2>
+            output.innerText = "Summarizing...";
 
-<div id="output"></div>
+            const response = await fetch("/summarize", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text: text })
+            });
 
-</div>
-
-<script>
-function summarize(){
-    const text = document.getElementById("inputText").value;
-
-    document.getElementById("output").innerText =
-        "Summary will appear here (backend coming next step)";
-}
-</script>
-
+            const data = await response.json();
+            output.innerText = data.summary;
+        }
+    </script>
 </body>
 </html>
