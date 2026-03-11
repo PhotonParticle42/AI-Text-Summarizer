@@ -6,10 +6,31 @@
     <title>Text Summarizer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
-    <div class="container">
-        <h1>AI Text Summarizer</h1>
-        <p>Your app is running successfully.</p>
-    </div>
+
+<div class="container">
+
+<h1>AI Text Summarizer</h1>
+
+<textarea id="inputText" placeholder="Paste your text here..."></textarea>
+
+<button onclick="summarize()">Summarize</button>
+
+<h2>Summary</h2>
+
+<div id="output"></div>
+
+</div>
+
+<script>
+function summarize(){
+    const text = document.getElementById("inputText").value;
+
+    document.getElementById("output").innerText =
+        "Summary will appear here (backend coming next step)";
+}
+</script>
+
 </body>
 </html>
