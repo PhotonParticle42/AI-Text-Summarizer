@@ -1,15 +1,27 @@
-from flask import Flask, render_template, request, jsonify
+import os
+
+from dotenv import load_dotenv
+from flask import Flask, jsonify, render_template, request
+from openai import OpenAI
+
+load_dotenv()
 
 app = Flask(__name__)
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def fake_summary(text):
-    text = text.strip()
 
-    if len(text) <= 120:
-        return text
+def real_ai_summary(text):
+    response = client.responses.create(
+        model="gpt-5",
+        input=(
+            "Summarize the following text in 3 to 5 clear bullet points. "
+            "Keep the meaning accurate and concise.\n\n"
+            f"Text:\n{text}"
+        ),
+    )
 
-    return text[:120] + "..."
+    return response.output_text
 
 
 @app.route("/")
@@ -25,8 +37,11 @@ def summarize():
     if not text.strip():
         return jsonify({"summary": "Please enter some text to summarize."})
 
-    summary = fake_summary(text)
-    return jsonify({"summary": summary})
+    try:
+        summary = real_ai_summary(text)
+        return jsonify({"summary": summary})
+    except Exception as e:
+        return jsonify({"summary": f"Error: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
