@@ -8,7 +8,13 @@ load_dotenv()
 
 app = Flask(__name__)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    raise ValueError("OPENAI_API_KEY is not set")
+
+client = OpenAI(api_key=api_key)
 
 
 def real_ai_summary(text):
