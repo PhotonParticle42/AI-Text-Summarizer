@@ -8,9 +8,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-
 api_key = os.getenv("OPENAI_API_KEY")
-
 if not api_key:
     raise ValueError("OPENAI_API_KEY is not set")
 
@@ -26,7 +24,6 @@ def real_ai_summary(text):
             f"Text:\n{text}"
         ),
     )
-
     return response.output_text
 
 
@@ -37,17 +34,21 @@ def home():
 
 @app.route("/summarize", methods=["POST"])
 def summarize():
-    data = request.get_json()
-    text = data.get("text", "")
+    data = request.get_json(silent=True)
 
-    if not text.strip():
-        return jsonify({"summary": "Please enter some text to summarize."})
+    if not data:
+        return jsonify({"error": "Invalid request body."}), 400
+
+    text = data.get("text", "").strip()
+
+    if not text:
+        return jsonify({"error": "Please enter some text to summarize."}), 400
 
     try:
         summary = real_ai_summary(text)
         return jsonify({"summary": summary})
-    except Exception as e:
-        return jsonify({"summary": f"Error: {str(e)}"}), 500
+    except Exception:
+        return jsonify({"error": "Something went wrong while generating the summary."}), 500
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@
 
         <textarea id="inputText" placeholder="Paste your text here..."></textarea>
 
-        <button onclick="summarizeText()">Summarize</button>
+        <button id="summarizeBtn" onclick="summarizeText()">Summarize</button>
 
         <h2>Summary</h2>
         <div id="output">Your summary will appear here.</div>
@@ -20,21 +20,42 @@
 
     <script>
         async function summarizeText() {
-            const text = document.getElementById("inputText").value;
+            const text = document.getElementById("inputText").value.trim();
             const output = document.getElementById("output");
+            const button = document.getElementById("summarizeBtn");
 
-            output.innerText = "Summarizing...";
+            if (!text) {
+                output.innerText = "Please enter some text first.";
+                return;
+            }
 
-            const response = await fetch("/summarize", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ text: text })
-            });
+            button.disabled = true;
+            button.innerText = "Summarizing...";
+            output.innerText = "Generating summary...";
 
-            const data = await response.json();
-            output.innerText = data.summary;
+            try {
+                const response = await fetch("/summarize", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    output.innerText = data.error || "Something went wrong.";
+                    return;
+                }
+
+                output.innerText = data.summary;
+            } catch (error) {
+                output.innerText = "Network error. Please try again.";
+            } finally {
+                button.disabled = false;
+                button.innerText = "Summarize";
+            }
         }
     </script>
 </body>
