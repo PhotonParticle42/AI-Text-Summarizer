@@ -17,28 +17,77 @@
             <option value="paragraph">One Paragraph</option>
         </select>
 
-        <textarea id="inputText" placeholder="Paste your text here..."></textarea>
+        <label for="inputText">Input Text</label>
+        <textarea id="inputText" placeholder="Paste your text here..." oninput="updateTextStats()"></textarea>
 
-        <button id="summarizeBtn" onclick="summarizeText()">Summarize</button>
+        <div class="stats">
+            <span id="charCount">Characters: 0</span>
+            <span id="wordCount">Words: 0</span>
+        </div>
+
+        <div class="button-row">
+            <button id="summarizeBtn" onclick="summarizeText()">Summarize</button>
+            <button id="clearBtn" onclick="clearAll()" type="button">Clear</button>
+            <button id="copyBtn" onclick="copySummary()" type="button">Copy Summary</button>
+        </div>
 
         <h2>Summary</h2>
         <div id="output">Your summary will appear here.</div>
     </div>
 
     <script>
+        function updateTextStats() {
+            const text = document.getElementById("inputText").value;
+            const trimmedText = text.trim();
+
+            const charCount = text.length;
+            const wordCount = trimmedText ? trimmedText.split(/\s+/).length : 0;
+
+            document.getElementById("charCount").innerText = `Characters: ${charCount}`;
+            document.getElementById("wordCount").innerText = `Words: ${wordCount}`;
+        }
+
+        function clearAll() {
+            document.getElementById("inputText").value = "";
+            document.getElementById("output").innerText = "Your summary will appear here.";
+            document.getElementById("summaryMode").value = "short";
+            updateTextStats();
+        }
+
+        async function copySummary() {
+            const outputText = document.getElementById("output").innerText;
+
+            if (!outputText || outputText === "Your summary will appear here.") {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(outputText);
+                const copyBtn = document.getElementById("copyBtn");
+                const originalText = copyBtn.innerText;
+
+                copyBtn.innerText = "Copied!";
+                setTimeout(() => {
+                    copyBtn.innerText = originalText;
+                }, 1500);
+            } catch (error) {
+                alert("Could not copy summary.");
+            }
+        }
+
         async function summarizeText() {
             const text = document.getElementById("inputText").value.trim();
             const mode = document.getElementById("summaryMode").value;
             const output = document.getElementById("output");
-            const button = document.getElementById("summarizeBtn");
+            const summarizeBtn = document.getElementById("summarizeBtn");
 
             if (!text) {
                 output.innerText = "Please enter some text first.";
                 return;
             }
 
-            button.disabled = true;
-            button.innerText = "Summarizing...";
+            summarizeBtn.disabled = true;
+            summarizeBtn.innerText = "Summarizing...";
             output.innerText = "Generating summary...";
 
             try {
@@ -64,10 +113,12 @@
             } catch (error) {
                 output.innerText = "Network error. Please try again.";
             } finally {
-                button.disabled = false;
-                button.innerText = "Summarize";
+                summarizeBtn.disabled = false;
+                summarizeBtn.innerText = "Summarize";
             }
         }
+
+        updateTextStats();
     </script>
 </body>
 </html>
