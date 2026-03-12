@@ -10,6 +10,13 @@
     <div class="container">
         <h1>AI Text Summarizer</h1>
 
+        <label for="summaryMode">Summary Style</label>
+        <select id="summaryMode">
+            <option value="short">Short</option>
+            <option value="bullet">Bullet Points</option>
+            <option value="paragraph">One Paragraph</option>
+        </select>
+
         <textarea id="inputText" placeholder="Paste your text here..."></textarea>
 
         <button id="summarizeBtn" onclick="summarizeText()">Summarize</button>
@@ -21,6 +28,7 @@
     <script>
         async function summarizeText() {
             const text = document.getElementById("inputText").value.trim();
+            const mode = document.getElementById("summaryMode").value;
             const output = document.getElementById("output");
             const button = document.getElementById("summarizeBtn");
 
@@ -39,7 +47,10 @@
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ text: text })
+                    body: JSON.stringify({
+                        text: text,
+                        mode: mode
+                    })
                 });
 
                 const data = await response.json();

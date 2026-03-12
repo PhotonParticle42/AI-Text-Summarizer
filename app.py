@@ -15,15 +15,27 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 
-def real_ai_summary(text):
+def build_prompt(text, mode):
+    if mode == "short":
+        instruction = "Summarize the following text in 2 to 3 short sentences."
+    elif mode == "bullet":
+        instruction = "Summarize the following text in 3 to 5 concise bullet points."
+    elif mode == "paragraph":
+        instruction = "Summarize the following text in one clear paragraph."
+    else:
+        instruction = "Summarize the following text clearly and concisely."
+
+    return f"{instruction}\n\nText:\n{text}"
+
+
+def real_ai_summary(text, mode):
+    prompt = build_prompt(text, mode)
+
     response = client.responses.create(
         model="gpt-5",
-        input=(
-            "Summarize the following text in 3 to 5 clear bullet points. "
-            "Keep the meaning accurate and concise.\n\n"
-            f"Text:\n{text}"
-        ),
+        input=prompt,
     )
+
     return response.output_text
 
 
@@ -40,12 +52,17 @@ def summarize():
         return jsonify({"error": "Invalid request body."}), 400
 
     text = data.get("text", "").strip()
+    mode = data.get("mode", "short").strip().lower()
 
     if not text:
         return jsonify({"error": "Please enter some text to summarize."}), 400
 
+    allowed_modes = {"short", "bullet", "paragraph"}
+    if mode not in allowed_modes:
+        return jsonify({"error": "Invalid summary mode selected."}), 400
+
     try:
-        summary = real_ai_summary(text)
+        summary = real_ai_summary(text, mode)
         return jsonify({"summary": summary})
     except Exception:
         return jsonify({"error": "Something went wrong while generating the summary."}), 500
